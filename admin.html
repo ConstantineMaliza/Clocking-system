@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+      integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
+      crossorigin="anonymous"
+    />
+
+    <title>Document</title>
+  </head>
+  <style>
+    body {
+      background-color: #f8f9fd;
+    }
+    .width {
+      margin-top: 2rem;
+    }
+  </style>
+  <body>
+    <nav
+      class="navbar navbar-light justify-content-between"
+      style="background-color: #e3f2fd"
+    >
+      <a class="navbar-brand">Clocking System</a>
+      <div>
+        <span
+          ><i class="fas fa-user"></i>
+          <span id="fullname"> JohnDoue@gmail.com</span>
+        </span>
+        <button
+          class="btn btn-outline-danger my-2 my-sm-0"
+          type="submit"
+          id="logout"
+        >
+          Signout
+        </button>
+    </nav>
+    <div class="container width">
+      <div class="row">
+        <div class="col-12 col-md-4">
+          <div class="add">
+            <form id="registerForm">
+              <h3>Add new Employee</h3>
+              <br />
+              <div class="form-group">
+                <label for="exampleInputEmail1">Full Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="fullname"
+                  name="fullname"
+                  aria-describedby="emailHelp"
+                  placeholder="Enter Full name"
+                />
+              </div>
+              <div class="form-group">
+                <label for="exampleInputEmail1">Email address</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  name="email"
+                  aria-describedby="emailHelp"
+                  placeholder="Enter email"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="exampleInputEmail1">Role</label>
+                <select class="form-control" id="role">
+                  <option value="1">HR</option>
+                  <option value="2">Manager</option>
+                  <option value="3">QA</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="exampleInputPassword1">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  name="password"
+                  placeholder="Password"
+                />
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                Add new employee
+              </button>
+            </form>
+          </div>
+        </div>
+        <div class="col-12 col-md-8">
+          <h3>Employees list</h3>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Role</th>
+                <th scope="col">Email</th>
+              </tr>
+            </thead>
+            <tbody id="body">
+            
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-firestore.js"></script>
+
+  <script src="js/firebase.js"></script>
+  <script src="js/init.js"></script>
+
+  <script>
+    const form = document.querySelector("#registerForm");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const fullname = form["fullname"].value;
+      const email = form["email"].value;
+      const password = form["password"].value;
+      let inputRole = document.getElementById("role");
+      const role = inputRole.options[inputRole.selectedIndex].text;
+
+      auth
+        .createUserWithEmailAndPassword(email, password)
+        .catch(function (error) {
+          let errorCode = error.code;
+          let errorMessage = error.message;
+
+          alert(errorCode + " - " + errorMessage);
+        })
+        .then((cred) => {
+          const uid = cred.user.uid;
+          db.collection("User")
+            .doc(uid)
+            .set({
+              uid,
+              fullname,
+              email,
+              password,
+              role,
+            })
+            .then((result) => {
+              form.reset();
+            
+              console.log("Successfull Sign up ");
+              
+            });
+        });
+    });
+
+        db.collection("User").onSnapshot((docs) => {
+
+    
+    let htmlAll = "";
+    let childCounts = docs.size;
+    let t = 0;
+    let i = childCounts + 1;
+
+    docs.forEach((doc) =>{
+        let id = doc.id;
+        const user = doc.data();
+        let html ="";
+   
+        if(t==0){
+            htmlAll = "";  
+          }
+          t++;
+          i--;
+        html = `
+        <tr>
+            <th scope="row">${i}</th>
+            <td>${user.fullname}</td>
+            <td>${user.role}</td>
+            <td>${user.email}</td>
+        </tr>
+
+        `;
+        htmlAll = html + htmlAll;
+            if(t == childCounts) {
+        document.getElementById('body').innerHTML = htmlAll;
+            }
+    })
+    })
+  </script>
+</html>

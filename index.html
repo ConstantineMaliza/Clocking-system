@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <title>Clocking System</title>
+  </head>
+  <style>
+    .width {
+      width: 100%;
+      max-width: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    form {
+      width: 500px;
+    }
+  </style>
+  <body>
+    <section class="container width">
+      <form id="loginForm">
+        <h1>Clocking</h1>
+        <br />
+        <div class="form-group">
+          <label for="exampleInputEmail1">Email address</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            aria-describedby="emailHelp"
+            placeholder="Enter email"
+          />
+        </div>
+        <div class="form-group">
+          <label for="exampleInputPassword1">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            placeholder="Password"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+    </section>
+  </body>
+  <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-firestore.js"></script>
+
+  <script src="js/firebase.js"></script>
+  <!-- <script src="js/init.js"></script> -->
+  <script>
+    const form = document.querySelector("#loginForm");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const email = form["email"].value;
+      const password = form["password"].value;
+
+      auth
+        .signInWithEmailAndPassword(email, password)
+        .catch(function (error) {
+          var errorCode = error.code;
+          var errorMessage = error.message;
+
+          alert(errorCode + " - " + errorMessage);
+
+          try {
+            cred.user.sendPasswordResetEmail(email);
+          } catch (err) {}
+        })
+        .then((cred) => {
+          //    window.location.href="admin/dashboard.html"
+          const uid = cred.user.uid;
+
+          db.collection("User")
+            .doc(uid)
+            .get()
+            .then(function (snapshot) {
+              let childData = snapshot.data();
+
+              console.log(childData);
+
+              let fullname = childData.fullname;
+              let role = childData.role;
+              let email = childData.email;
+              sessionStorage.setItem("fullname", fullname);
+              if (role === "admin") {
+                sessionStorage.setItem("uid", uid);
+                sessionStorage.setItem("email", email);
+                sessionStorage.setItem("fullname", fullname);
+                console.log(fullname);
+                window.location.href = "admin.html";
+              } else if (role === "HR") {
+                sessionStorage.setItem("uid", uid);
+                sessionStorage.setItem("email", email);
+                sessionStorage.setItem("fullname", fullname);
+
+                console.log(fullname);
+                window.location.href = "hr.html";
+              } else {
+                sessionStorage.setItem("uid", uid);
+                sessionStorage.setItem("email", email);
+                sessionStorage.setItem("fullname", fullname);
+
+                console.log(fullname);
+                window.location.href = "employee.html";
+              }
+            });
+        });
+    });
+  </script>
+</html>

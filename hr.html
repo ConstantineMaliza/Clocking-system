@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+      integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
+      crossorigin="anonymous"
+    />
+
+    <title>Document</title>
+  </head>
+  <style>
+    body {
+      background-color: #f8f9fd;
+    }
+    .width {
+      margin-top: 2rem;
+    }
+
+    .left {
+      background-color: #080056;
+      height: 500px;
+      color: white;
+    }
+  </style>
+  <body>
+    <nav
+      class="navbar navbar-light justify-content-between"
+      style="background-color: #e3f2fd"
+    >
+      <a class="navbar-brand">Clocking System</a>
+      <div>
+        <span
+          ><i class="fas fa-user"></i>
+          <span id="fullname"> JohnDoue@gmail.com</span>
+        </span>
+        <button
+          class="btn btn-outline-danger my-2 my-sm-0"
+          type="submit"
+          id="logout"
+        >
+          Signout
+        </button>
+      </div>
+    </nav>
+    <div class="container width">
+      <h1>Report</h1>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Name</th>
+            <th scope="col">In</th>
+            <th scope="col">Out</th>
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody class="body"></tbody>
+      </table>
+    </div>
+  </body>
+  <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-firestore.js"></script>
+
+  <script src="js/firebase.js"></script>
+  <script src="js/init.js"></script>
+  <script>
+    function getWorkingTime(millisec) {
+      var seconds = (millisec / 1000).toFixed(0);
+      var minutes = Math.floor(seconds / 60);
+      var hours = "";
+      if (minutes > 59) {
+        hours = Math.floor(minutes / 60);
+        hours = hours >= 10 ? hours : "0" + hours;
+        minutes = minutes - hours * 60;
+        minutes = minutes >= 10 ? minutes : "0" + minutes;
+      }
+
+      seconds = Math.floor(seconds % 60);
+      seconds = seconds >= 10 ? seconds : "0" + seconds;
+      if (hours != "") {
+        return hours + "h :" + minutes + " m:" + seconds + " s";
+      }
+      return minutes + "m :" + seconds + " s";
+    }
+
+    db.collection("session").onSnapshot((docs) => {
+      let htmlAll = "";
+      let childCounts = docs.size;
+      let t = 0;
+      let i = childCounts + 1;
+
+      docs.forEach((doc) => {
+        let id = doc.id;
+        const session = doc.data();
+
+        let workhour = session.clockOut - session.clockIn;
+
+        let html = "";
+
+        if (t == 0) {
+          htmlAll = "";
+        }
+        t++;
+        i--;
+        html = `
+            <tr>
+            <th scope="row">${session.today}</th>
+            <td>${session.fullname}</td>
+            <td>${new Date(session.clockIn).toLocaleTimeString("en-US")}</td>
+            <td>${new Date(session.clockOut).toLocaleTimeString("en-US")}</td>
+            <td>${getWorkingTime(workhour)}</td>
+        </tr>
+
+            `;
+        htmlAll = html + htmlAll;
+        if (t == childCounts) {
+          document.querySelector(".body").innerHTML = htmlAll;
+        }
+      });
+    });
+  </script>
+
+  <script></script>
+</html>
