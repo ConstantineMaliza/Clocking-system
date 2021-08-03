@@ -103,23 +103,23 @@
               <div class="card">
                 <div class="card-body">
                   <p>Today</p>
-                  <h5 class="card-title" id="today">Mon, Aug 2</h5>
-                  <p class="card-text">You have not clocked-in yet</p>
+                  <h5 class="card-title" id="today"></h5>
+                  <p class="card-text" id="message" >You have not clocked-in yet</p>
                   
-                      <a href="#" class="btn btn-clockin" id="clockIn" >Clock In</a>
+                      <a href="#" class="btn btn-clockin invisible" id="clockIn" >Clock In</a>
                       <a href="#" class="btn btn-clockout invisible" id="clockOut">Clock Out</a>
                 
                 </div>
               </div>
             </div>
-            <div class="col-12 col-sm-6 col-md-6">
+            <!-- <div class="col-12 col-sm-6 col-md-6">
               <div class="card">
                 <div class="card-body">
                   <p>Total working hours</p>
                   <h5 class="card-title" id="workingHour">0: 00</h5>
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -134,16 +134,12 @@
           </tr>
         </thead>
         <tbody class="body">
-          <tr>
-            <th scope="row">Mon, Aug 2 2021</th>
-            <td>8:00 AM</td>
-            <td>7:00 PM</td>
-            <td>2h 40m</td>
-          </tr>
+        
         </tbody>
       </table>
     </div>
   </body>
+  <script src="js/localstorage.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-firestore.js"></script>
@@ -158,6 +154,8 @@
       const options = { year: 'numeric', month: 'short', day: 'numeric' };
       const options2 = {  weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
       document.getElementById("today").innerHTML = new Date().toLocaleDateString(undefined, options2)
+
+      const msg = document.querySelector("#message");
 
     uid = sessionStorage.getItem("uid"),
     fullname = sessionStorage.getItem("fullname")
@@ -175,7 +173,14 @@
         
     })
     .then(result =>{
+        msg.textContent = "Already finished you work have wonderful day!";
+    
         clockout.classList.toggle("invisible");
+        const lastsession = JSON.parse(localStorage.getItem(suid));
+
+        localStorage.setItem(uid, JSON.stringify({...lastsession, clockout:today}))
+
+
         
     })
     
@@ -194,7 +199,7 @@
 
 
     db.collection("session").doc(today+uid).set({
-        clockIn,
+        clockIn ,
         uid,
         fullname,
         today: new Date().toLocaleDateString(undefined, options2)
@@ -202,8 +207,13 @@
     })
     .then(result =>{
 
+      msg.textContent = "You have started Enjoy your work! Have nice day";
         clockin.classList.toggle("invisible");
         clockout.classList.toggle("invisible");
+
+        localStorage.setItem(uid, JSON.stringify({clockin:today}))
+
+        
         
     })
 
@@ -243,7 +253,7 @@
             let workhour = session.clockOut -  session.clockIn;
             
             
-            document.getElementById("workingHour").innerHTML= getWorkingTime(workhour)
+            // document.getElementById("workingHour").innerHTML= getWorkingTime(workhour)
 
             
             let html="";
@@ -277,4 +287,5 @@
     })
 
   </script>
+ 
 </html>
